@@ -1,0 +1,244 @@
+
+<!DOCTYPE html>
+<html lang="en" translate="no">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Pengumuman SMAN 2 Cilacap</title>
+     <link href="./output.css" rel="stylesheet">
+    <style>
+    
+
+      #my-canvas {
+        position: fixed;
+        top: 0;
+        left: 0;
+        pointer-events: none;
+        width: 100%;
+        height: 100%;
+        z-index: 50;
+      }
+    </style>
+  </head>
+  <body class="min-h-screen flex items-center justify-center" >
+  <div style="background-color: #0365c6;" class="w-full max-w-[470px] p-4 bg-white shadow-md rounded-lg  relative z-10">
+    
+    <!-- Image with Overlay -->
+    <div class="relative mb-4 rounded-lg overflow-hidden">
+      <img
+        src="https://sis.sman81.sch.id/assets/img/kko-small.webp" 
+        alt="Header Image"
+        class="w-full object-cover"
+      />
+      <!-- Overlay title -->
+    
+    </div>
+
+    <!-- Form -->
+    <form id="searchForm" class="space-y-4">
+      <!-- <div class="text-center mb-6">
+  <h1 class="text-2xl font-bold text-white">Pengumuman Kelulusan</h1>
+  <p class="text-lg text-white">Tahun Ajaran 2025/2026</p>
+</div> -->
+      <div>
+        <label for="userId" class="block text-sm  text-white  font-medium">Nomor Pendaftaran</label>
+        <input
+          type="text" value="L038"
+          id="userId"
+          class="mt-1 w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+        />
+      </div>
+      <div>
+        <label for="birthDate" class="block text-sm text-white font-medium">Tanggal Lahir</label>
+        <input
+          type="date" value="2009-06-29"
+          id="birthDate"
+          class="mt-1 w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+        />
+      </div>
+      <button
+        type="submit"
+        class="w-full bg-red-500 text-white py-2 rounded-md hover:bg-red-600 transition"
+      >
+        Cari
+      </button>
+    </form>
+<div id="alertBox" class="mt-2 hidden bg-yellow-100 border-l-4 border-yellow-500 text-yellow-700 p-4 mb-4 rounded-md" role="alert">
+  <p id="alertMessage"></p>
+</div>
+
+    <!-- Results -->
+    <div id="searchResults" class="mt-6 text-sm"></div>
+    
+     <div class="relative mb-4 rounded-lg overflow-hidden"> 
+      <img
+        src="https://sis.sman81.sch.id/assets/img/kko-down.webp" 
+        alt="Header Image"
+        class="w-full object-cover"
+      />
+      <!-- Overlay title -->
+    
+    </div>
+  </div>
+
+    <!-- Canvas Confetti -->
+    <canvas id="my-canvas"></canvas>
+
+    <!-- Loading Overlay -->
+    <div
+      id="loadingOverlay"
+      class="fixed inset-0 bg-white bg-opacity-80 z-40 hidden flex flex-col items-center justify-center"
+    >
+      <div class="w-10 h-10 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+      <p class="mt-4 text-sm text-gray-800">Loading...</p>
+    </div>  
+<div class="d-none bg-green-100 bg-green-800 bg-red-800 bg-red-100 text-green-700 text-red-700"></div> 
+    <!-- Scripts -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/confetti-js@0.0.18/dist/index.min.js"></script>
+    <script > 
+     window.addEventListener('DOMContentLoaded', function () {
+    const formElement = document.getElementById('searchForm');
+    if (formElement) {
+      formElement.scrollIntoView({ behavior: 'smooth' });
+    }
+  });
+    
+    const birthDateInput = document.getElementById("birthDate");
+birthDateInput.min = "2007-01-01";
+birthDateInput.max = "2011-12-31";
+
+birthDateInput.addEventListener("change", function () {
+  const selectedDate = new Date(this.value);
+  const minDate = new Date(this.min);
+  const maxDate = new Date(this.max);
+  if (selectedDate < minDate || selectedDate > maxDate) {
+    alert("Tanggal lahir harus antara 2006 dan 2009.");
+    this.value = "";
+  }
+});
+/*
+const users = [
+  {
+    id: "L038",
+    birth_date: "2009-06-29",
+    name: "Dimas Hipnu Rimawan",
+    sekolah_asal: "SMP Negeri 1 Cilacap",
+    cabor: "Sepak Bola",
+    status: "LULUS",
+  },
+  
+];*/
+
+const confetti = new ConfettiGenerator({
+  target: "my-canvas",
+  max: 100,
+  size: 1.2,
+  animate: true,
+});
+
+function fadeOut(element, duration) {
+  let opacity = 1;
+  const interval = 50;
+  const decrement = interval / duration;
+  const fade = setInterval(() => {
+    if (opacity <= 0) {
+      clearInterval(fade);
+      element.style.display = "none";
+    } else {
+      opacity -= decrement;
+      element.style.opacity = opacity;
+    }
+  }, interval);
+}
+
+function stopConfetti() {
+  const canvas = document.getElementById("my-canvas");
+  setTimeout(() => fadeOut(canvas, 3000), 3000);
+}
+document
+  .getElementById("searchForm")
+  .addEventListener("submit", function (event) {
+    event.preventDefault();
+    document.getElementById("loadingOverlay").classList.remove("hidden");
+
+    setTimeout(() => {
+      searchUsers();
+      document.getElementById("loadingOverlay").classList.add("hidden");
+    }, 800);
+  });
+function searchUsers() {
+  const userId = document.getElementById("userId").value;
+  const birthDate = document.getElementById("birthDate").value;
+  const resultsContainer = document.getElementById("searchResults");
+  resultsContainer.innerHTML = "";
+
+  // INI VERSI LOKAL
+  /* const matched = users.find(user => user.id === userId && user.birth_date === birthDate);
+  if (matched) {
+    const statusColor = matched.status === "LULUS" ? "green" : "red";
+    const statusText =
+      matched.status === "LULUS"
+        ? "Selamat, Anda dinyatakan LULUS!"
+        : "Mohon maaf, Anda TIDAK LULUS.";
+
+    if (matched.status === "LULUS") {
+      confetti.render();
+      stopConfetti();
+    }
+      */
+
+    fetch("https://siswa.sman81.sch.id/api/cekpengumumankko", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({ id: userId, birth_date: birthDate })
+  })
+    .then(res => res.json())
+    .then(response => {
+       if (response.status === "not_yet") {
+        alertMessage.textContent = response.message;
+        alertBox.classList.remove("hidden");
+        setTimeout(() => {
+  alertBox.classList.add("hidden");
+}, 10000); 
+        return; 
+      } 
+      if (response.success) {
+        const matched = response.data;
+        const statusColor = matched.status === "LULUS" ? "green" : "red";
+        const statusText = matched.status === "LULUS"
+          ? "Selamat, Anda dinyatakan LULUS!"
+          : "Mohon maaf, Anda TIDAK LULUS.";
+
+        if (matched.status === "LULUS") {
+          confetti.render();
+          stopConfetti();
+        }
+
+    resultsContainer.innerHTML = `
+      <div class="bg-${statusColor}-100 text-${statusColor}-700 p-4 rounded-md shadow">
+        <p class="font-bold mb-4 text-${statusColor}-700">${statusText}</p>
+        <table class="w-full text-left text-sm">
+          <tr><td class="py-1 text-${statusColor}-700""><strong>Nama</strong></td><td class="py-1">: ${matched.name}</td></tr>
+          <tr><td class="py-1 text-${statusColor}-700""><strong>No. Pendaftaran</strong></td><td class="py-1">: ${matched.id}</td></tr>
+          <tr><td class="py-1 text-${statusColor}-700""><strong>Sekolah Asal</strong></td><td class="py-1">: ${matched.sekolah_asal}</td></tr>
+          <tr><td class="py-1 text-${statusColor}-700""><strong>Cabang Olahraga</strong></td><td class="py-1">: ${matched.cabor}</td></tr>
+        </table>
+      </div> <br><br>`;
+  } else {
+    resultsContainer.innerHTML = `<p class="text-center text-white">Data tidak ditemukan.<br><br> </p>`;
+  }
+
+  resultsContainer.scrollIntoView({ behavior: "smooth", block: "start" });
+}
+)
+    .catch(err => {
+      console.error("Error:", err);
+      resultsContainer.innerHTML = `<p class="text-center text-white">Terjadi kesalahan saat menghubungi server.<br><br></p>`;
+    });
+}
+</script>
+  </body>
+</html>
